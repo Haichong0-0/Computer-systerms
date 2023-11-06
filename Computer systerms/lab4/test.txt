@@ -1,0 +1,32 @@
+
+loop4:  ldi r20, 25
+        
+
+loop3:  nop
+        ldi r19,255  
+
+
+loop2:  nop
+        ldi r18,255
+
+loop1:  nop
+        dec r18
+        cpi r18,0
+        brne loop1
+
+        dec r19
+        cpi r19,0
+        brne loop2
+
+        dec r20
+        cpi r20,0
+        brne loop3
+    
+        cpi r16, 0xFF
+        ldi r20, 25
+        breq loop3
+
+        ldi r20, 25
+        dec r21
+        cpi r21,0
+        brne loop4

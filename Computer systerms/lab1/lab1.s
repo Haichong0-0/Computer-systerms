@@ -1,0 +1,1 @@
+.equ SREG ,0x3f
