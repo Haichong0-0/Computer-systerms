@@ -6,23 +6,33 @@
 .equ DDRB,  0x04    ; Register defining pins on port B to be input (0) or output (1)
 .equ PORTB, 0x05    ; Output port for PORTB
 
-main:   call knumdisplay
+        .org 0
+
+main:   ldi r16, 0      
+        out SREG,r16
+
+        ldi r16,0xff
+        out DDRB, r16
+        out DDRD, r16
+
+        call knumdisplay
         call initdisplay
         
-        ldi r23,50
+        ldi r23,0
 mloop:  mov r24,r23
         lsr r24 ;move 1 bit to carry
         brcs odd; test if carry
         call morseeven
-        dec r23
-        cpi r23,0
-        brne 
+        inc r23
+        cpi r23,50
+        brne mloop
+        jmp next
 odd:    call morseodd
-        dec r23
-        cpi r23,0
-        brne 
+        inc r23
+        cpi r23,50
+        brne mloop
 
-        ldi r24,200
+next:   ldi r24,200
         call pingp
         
 
@@ -56,10 +66,10 @@ initdisplay:    ;G.H
                 ldi r20, 27 ;.
                 call display
                 ldi r20,8 ;H
+                call display
                 ret
 
 morseodd:       ;GEO 
-                ;G
                 ldi r21,6 ;on for 600ms
                 ldi r22,2 ;off for 200ms 
                 call morsedisplay
@@ -117,7 +127,7 @@ morsedisplay:   ;consider each on off as a loop
                 ret
 
 
-pingp:  ldi r21,3 ;reach position for 0.3s
+pingp:  ldi r21,2 ;reach position for 0.2s
         ldi r20,0x01; Starts with 00000001
         call display
 
@@ -134,7 +144,7 @@ right:  lsr r20
         call display
         dec r23
         cpi r23,0
-        brne left
+        brne right
         
         dec r24
         cpi r24,0
@@ -146,16 +156,16 @@ right:  lsr r20
 delay:  ldi r17, 250 ; 250
         ldi r18, 128 ; 128
         ldi r19, 10  ; 10
-        ; 5 cycles * 250 * 128 * 10 / 16,000,000 = 0.10000 seconds (100ms)
+        ; 5 cycles * 250 * 128 * 9 / 16,000,000 = 0.10000 seconds (100ms)
 loop1:  nop        ; 1 cycle
         dec r17    ; 1 cycle
         cpi r17, 0 ; 1 cycle
         brne loop1 ; 2 cycles when branching
-        ldi r17, 255 ; reset inner loop
+        ldi r17, 250 ; reset inner loop
         dec r18
         cpi r18, 0
         brne loop1
-        ldi r18, 255 ; reset first outer loop
+        ldi r18, 128 ; reset first outer loop
         dec r19
         cpi r19, 0
         brne loop1
@@ -163,23 +173,12 @@ loop1:  nop        ; 1 cycle
 
 
 display:	;display with delay value: r20, delay: 0.1*r21
-                mov r17,r20 ;Displays whatever is stored in r20 
-		lsr r17
-		lsr r17
-		lsr r17
-		lsr r17
-		mov r18,r20
-		lsl r18
-		lsl r18
-		lsl r18
-		lsl r18
-		out PORTB, r17
-		out PORTD, r18
-
-sloop:          mov r20,r21
-                dec r20
-                call delay
-                cpi r20,0
+		out PORTB, r20
+		out PORTD, r20
+                mov r25,r21
+sloop:          call delay
+                dec r25
+                cpi r25,0
                 brne sloop
-
 		ret
+                
